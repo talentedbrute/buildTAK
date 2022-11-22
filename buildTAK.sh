@@ -26,7 +26,7 @@ then
 fi
 
 # Verbose output
-set -x
+# set -x
 
 # Stop on Error
 set -e
@@ -39,6 +39,13 @@ export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
 ANDROID_SDK_ROOT=${PWD}/sdk
 CMAKE_DIR=${PWD}/cmake-3.14.7-Linux-x86_64
 PATH=${PATH}:${CMAKE_DIR}/bin
+
+# Install the pre-requisites to build the system
+sudo apt -y install git git-lfs python3-pip dos2unix cmake build-essential tcl ninja-build libxml2-dev \
+libssl-dev sqlite3 zlib1g-dev ant openjdk-8-jdk automake autoconf libtool swig cmake apg g++ \
+make tcl patch
+
+sudo pip3 install conan
 
 if [ ! -d ${ANDROID_NDK_HOME} ];
 then
