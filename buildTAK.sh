@@ -1,14 +1,24 @@
 #!/bin/bash
-PREBUILD=
+# Verbose output
+set -x
+
+# Stop on Error
+set -e
+
+PREBUILD=0
+CLEAN=0
 newTAK=
 
-usage() { echo "Usage: $0 [-p ] -f flavor" 1>&2; exit 1; }
+usage() { printf "Usage: $0 [-pc ] -f flavor\n\t-p\tJust run prebuild\n\t-c\tclean everything\n\n" 1>&2; exit 1; }
 
-while getopts "pf:" options;
+while getopts "cpf:" options;
 do
     case "${options}" in
         p)
             PREBUILD=1
+            ;;
+        c)
+            CLEAN=1
             ;;
         f)
             newTAK=${OPTARG}
@@ -25,12 +35,6 @@ then
     usage
 fi
 
-# Verbose output
-# set -x
-
-# Stop on Error
-set -e
-
 PWD=`pwd`
 export ANDROID_NDK_HOME=${PWD}/android-ndk-r12b
 export ANDROID_NDK=${PWD}/android-ndk-r12b
@@ -42,8 +46,8 @@ PATH=${PATH}:${CMAKE_DIR}/bin
 
 # Install the pre-requisites to build the system
 sudo apt -y install git git-lfs python3-pip dos2unix cmake build-essential tcl ninja-build libxml2-dev \
-libssl-dev sqlite3 zlib1g-dev ant openjdk-8-jdk automake autoconf libtool swig cmake apg g++ \
-make tcl patch
+libssl-dev sqlite3 zlib1g-dev ant openjdk-8-jdk automake autoconf libtool swig cmake apg g++ \ 
+make tcl patch libogdi-dev
 
 sudo pip3 install conan
 
@@ -67,7 +71,6 @@ then
     tar -zxpf cmake-3.14.7-Linux-x86_64.tar.gz
 fi
 
-
 if [ ! -d ${newTAK} ];
 then
     git clone https://github.com/deptofdefense/AndroidTacticalAssaultKit-CIV.git ${newTAK}
@@ -86,10 +89,24 @@ then
     cd ../atak
 else
     cd ${newTAK}
+
+    # If the user wants a clean then whack everything
+    if [ ${CLEAN} == 1 ];
+    then
+        cd atak; ./gradlew clean; cd ../
+        rm -rf assimp gdal takengine/thirdparty libLAS LASzip
+    fi
+
     cp ../prebuild.sh scripts
     cd scripts
     ./prebuild.sh
 
+    # If the user just wants to run prebuild then exit
+    if [ ${PREBUILD} == 1 ]; 
+    then
+        printf "Finished building ATAK requirements\n"
+        exit
+    fi
     cd ../atak
 fi
 
