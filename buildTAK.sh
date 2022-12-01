@@ -46,7 +46,7 @@ PATH=${PATH}:${CMAKE_DIR}/bin
 
 # Install the pre-requisites to build the system
 sudo apt -y install git git-lfs python3-pip dos2unix cmake build-essential tcl ninja-build libxml2-dev \
-libssl-dev sqlite3 zlib1g-dev ant openjdk-8-jdk automake autoconf libtool swig cmake apg g++ \ 
+libssl-dev sqlite3 zlib1g-dev ant openjdk-8-jdk automake autoconf libtool swig cmake apg g++ \
 make tcl patch libogdi-dev
 
 sudo pip3 install conan
@@ -99,7 +99,7 @@ else
 
     cp ../prebuild.sh scripts
     cd scripts
-    ./prebuild.sh
+    ./prebuild.sh | tee prebuild.log
 
     # If the user just wants to run prebuild then exit
     if [ ${PREBUILD} == 1 ]; 
