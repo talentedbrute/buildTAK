@@ -7,16 +7,20 @@ set -e
 
 PREBUILD=0
 CLEAN=0
+SKIP=0
 newTAK=
 
-usage() { printf "Usage: $0 [-pc ] -f flavor\n\t-p\tJust run prebuild\n\t-c\tclean everything\n\n" 1>&2; exit 1; }
+usage() { printf "Usage: $0 [-psc ] -f flavor\n\t-p\tJust run prebuild\n\t\n\t-s\tskip prebuild-c\tclean everything\n\n" 1>&2; exit 1; }
 
-while getopts "cpf:" options;
+while getopts "scpf:" options;
 do
     case "${options}" in
         p)
             PREBUILD=1
             ;;
+	    s)
+	        SKIP=1
+	        ;;
         c)
             CLEAN=1
             ;;
@@ -50,7 +54,7 @@ libssl-dev sqlite3 zlib1g-dev ant openjdk-8-jdk automake autoconf libtool swig c
 make tcl patch libogdi-dev
 
 sudo pip3 install conan
-
+ 
 if [ ! -d ${ANDROID_NDK_HOME} ];
 then
     wget https://dl.google.com/android/repository/android-ndk-r12b-linux-x86_64.zip
@@ -97,17 +101,24 @@ else
         rm -rf assimp gdal takengine/thirdparty libLAS LASzip
     fi
 
-    cp ../prebuild.sh scripts
-    cd scripts
-    ./prebuild.sh | tee prebuild.log
-
-    # If the user just wants to run prebuild then exit
-    if [ ${PREBUILD} == 1 ]; 
+    if [ ${SKIP} == 0 ];
     then
-        printf "Finished building ATAK requirements\n"
-        exit
+        cp ../prebuild.sh scripts
+        cd scripts
+        ./prebuild.sh
+
+        # If the user just wants to run prebuild then exit
+        if [ ${PREBUILD} == 1 ]; 
+        then
+            printf "Finished building ATAK requirements\n"
+            exit
+        fi
+  	
+   	cd ../
+    else
+	printf "Skipping prebuild script, per user request\n"
     fi
-    cd ../atak
+    cd atak
 fi
 
 KEYFILE="`pwd`/${newTAK}.keystore"
