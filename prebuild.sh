@@ -22,6 +22,7 @@ tar zxf ../depends/LASzip-3.4.3-mod.tar.gz         -C ../ &
 wait
 
 NUMCPUS=`cat /proc/cpuinfo | grep processor | wc -l`
+NUMCPUS=`echo "scale=1;${NUMCPUS}/2" | bc`
 TARGETS="android-armeabi-v7a android-arm64-v8a android-x86"
 BUILDS="build_spatialite build_commoncommo build_gdal build_assimp"
 for TARGET in ${TARGETS};
@@ -32,9 +33,9 @@ do
 			(
 				printf "*************************************************\n"
 				printf "BUILDING TARGET: ${TARGET} for ${BUILD}\n"
-				printf "make -C ../takthirdparty TARGET=${TARGET} GDAL_USE_KDU=no ${BUILD}\n"
+				printf "make -j ${NUMCPUS} -C ../takthirdparty TARGET=${TARGET} GDAL_USE_KDU=no ${BUILD}\n"
 				printf "*************************************************\n"
-				make -C ../takthirdparty TARGET=${TARGET} GDAL_USE_KDU=no ${BUILD}
+				make -j ${NUMCPUS} -C ../takthirdparty TARGET=${TARGET} GDAL_USE_KDU=no ${BUILD}
 			)
 		done
 	)
