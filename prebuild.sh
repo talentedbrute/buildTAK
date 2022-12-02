@@ -22,7 +22,7 @@ tar zxf ../depends/LASzip-3.4.3-mod.tar.gz         -C ../ &
 wait
 
 NUMCPUS=`cat /proc/cpuinfo | grep processor | wc -l`
-NUMCPUS=`echo "scale=1;${NUMCPUS}/2" | bc`
+NUMCPUS=`echo "scale=0;${NUMCPUS}/2" | bc`
 TARGETS="android-armeabi-v7a android-arm64-v8a android-x86"
 BUILDS="build_spatialite build_commoncommo build_gdal build_assimp"
 for TARGET in ${TARGETS};
