@@ -53,7 +53,7 @@ sudo apt -y install git git-lfs python3-pip dos2unix cmake build-essential tcl n
 libssl-dev sqlite3 zlib1g-dev ant openjdk-8-jdk automake autoconf libtool swig cmake apg g++ \
 make tcl patch libogdi-dev
 
-sudo pip3 install conan
+pip3 install conan
  
 if [ ! -d ${ANDROID_NDK_HOME} ];
 then
@@ -97,7 +97,6 @@ else
     # If the user wants a clean then whack everything
     if [ ${CLEAN} == 1 ];
     then
-        cd atak; ./gradlew clean; cd ../
         rm -rf assimp gdal takengine/thirdparty libLAS LASzip
     fi
 
