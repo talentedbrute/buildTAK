@@ -21,6 +21,7 @@ tar zxf ../depends/libLAS-1.8.2-mod.tar.gz         -C ../ &
 tar zxf ../depends/LASzip-3.4.3-mod.tar.gz         -C ../ &
 wait
 
+## Anything other than 1 here seems to cause issues with the build
 NUMCPUS=1
 TARGETS="android-armeabi-v7a android-arm64-v8a android-x86"
 BUILDS="build_spatialite build_commoncommo build_gdal build_assimp"
@@ -39,20 +40,6 @@ do
 		done
 	)
 done
-
-# make -C ../takthirdparty \
-# 	TARGET=android-arm64-v8a GDAL_USE_KDU=no \
-# 	build_spatialite \
-# 	build_commoncommo \
-# 	build_gdal \
-# 	build_assimp &
-# make -C ../takthirdparty \
-# 	TARGET=android-x86 GDAL_USE_KDU=no \
-# 	build_spatialite \
-# 	build_commoncommo \
-# 	build_gdal \
-# 	build_assimp &
-# wait
 
 if [ -d ~/.conan ]; then
 	find ~/.conan -mindepth 1 -delete
