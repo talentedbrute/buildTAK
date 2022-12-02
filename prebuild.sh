@@ -21,7 +21,7 @@ tar zxf ../depends/libLAS-1.8.2-mod.tar.gz         -C ../ &
 tar zxf ../depends/LASzip-3.4.3-mod.tar.gz         -C ../ &
 wait
 
-NUMCPUS=2
+NUMCPUS=1
 TARGETS="android-armeabi-v7a android-arm64-v8a android-x86"
 BUILDS="build_spatialite build_commoncommo build_gdal build_assimp"
 for TARGET in ${TARGETS};

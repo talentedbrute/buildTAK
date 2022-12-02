@@ -97,7 +97,7 @@ else
     # If the user wants a clean then whack everything
     if [ ${CLEAN} == 1 ];
     then
-        rm -rf assimp gdal takengine/thirdparty libLAS LASzip
+        rm -rf assimp gdal takengine/thirdparty libLAS LASzip takthirdparty/builds
     fi
 
     if [ ${SKIP} == 0 ];
