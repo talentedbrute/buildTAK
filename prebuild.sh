@@ -12,8 +12,6 @@ pushd $(dirname $(readlink -f $0))
 
 mkdir -p ../takengine/thirdparty
 
-# rm -rf ../assimp/ ../gdal/ ../takengine/thirdparty/tinygltf* ../libLAS/ ../LASzip/
-
 # Extract everything in parallel
 tar zxf ../depends/assimp-4.0.1-mod.tar.gz         -C ../ &
 tar zxf ../depends/gdal-2.4.4-mod.tar.gz           -C ../ &
@@ -23,26 +21,25 @@ tar zxf ../depends/libLAS-1.8.2-mod.tar.gz         -C ../ &
 tar zxf ../depends/LASzip-3.4.3-mod.tar.gz         -C ../ &
 wait
 
-# Make the third party parts in parallel
-make -C ../takthirdparty \
-	TARGET=android-armeabi-v7a GDAL_USE_KDU=no \
-	build_spatialite \
-	build_commoncommo \
-	build_gdal \
-	build_assimp &
-make -C ../takthirdparty \
-	TARGET=android-arm64-v8a GDAL_USE_KDU=no \
-	build_spatialite \
-	build_commoncommo \
-	build_gdal \
-	build_assimp &
-make -C ../takthirdparty \
-	TARGET=android-x86 GDAL_USE_KDU=no \
-	build_spatialite \
-	build_commoncommo \
-	build_gdal \
-	build_assimp &
-wait
+## Anything other than 1 here seems to cause issues with the build
+NUMCPUS=1
+TARGETS="android-armeabi-v7a android-arm64-v8a android-x86"
+BUILDS="build_spatialite build_commoncommo build_gdal build_assimp"
+for TARGET in ${TARGETS};
+do
+	(
+		for BUILD in ${BUILDS};
+		do
+			(
+				printf "*************************************************\n"
+				printf "BUILDING TARGET: ${TARGET} for ${BUILD}\n"
+				printf "make -j ${NUMCPUS} -C ../takthirdparty TARGET=${TARGET} GDAL_USE_KDU=no ${BUILD}\n"
+				printf "*************************************************\n"
+				make -j ${NUMCPUS} -C ../takthirdparty TARGET=${TARGET} GDAL_USE_KDU=no ${BUILD}
+			)
+		done
+	)
+done
 
 if [ -d ~/.conan ]; then
 	find ~/.conan -mindepth 1 -delete
