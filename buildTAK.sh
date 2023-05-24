@@ -1,16 +1,16 @@
 #!/bin/bash
 # Verbose output
-set -x
+#set -x
 
 # Stop on Error
 set -e
 
 PREBUILD=0
 CLEAN=0
-SKIP=0
 newTAK=
+SKIP=0
 
-usage() { printf "Usage: $0 [-psc ] -f flavor\n\t-p\tJust run prebuild\n\t\n\t-s\tskip prebuild-c\tclean everything\n\n" 1>&2; exit 1; }
+usage() { printf "Usage: $0 [-pcs ] -f flavor\n\t-p\tJust run prebuild\n\t-c\tclean everything\n\t-s\tskip build pre-requistes\n\n" 1>&2; exit 1; }
 
 while getopts "scpf:" options;
 do
@@ -18,14 +18,14 @@ do
         p)
             PREBUILD=1
             ;;
-	    s)
-	        SKIP=1
-	        ;;
         c)
             CLEAN=1
             ;;
         f)
             newTAK=${OPTARG}
+            ;;
+        s)
+            SKIP=1
             ;;
         *)
             usage
@@ -48,13 +48,16 @@ ANDROID_SDK_ROOT=${PWD}/sdk
 CMAKE_DIR=${PWD}/cmake-3.14.7-Linux-x86_64
 PATH=${PATH}:${CMAKE_DIR}/bin
 
-# Install the pre-requisites to build the system
-sudo apt -y install git git-lfs python3-pip dos2unix cmake build-essential tcl ninja-build libxml2-dev \
-libssl-dev sqlite3 zlib1g-dev ant openjdk-8-jdk automake autoconf libtool swig cmake apg g++ \
-make tcl patch libogdi-dev
+if [ ${SKIP} == 0 ];
+then
+    # Install the pre-requisites to build the system
+    sudo apt -y install git git-lfs python3-pip dos2unix cmake build-essential tcl ninja-build libxml2-dev \
+    libssl-dev sqlite3 zlib1g-dev ant openjdk-8-jdk automake autoconf libtool swig cmake apg g++ \
+    make tcl patch libogdi-dev
 
-pip3 install conan
- 
+    sudo pip3 install conan
+fi
+
 if [ ! -d ${ANDROID_NDK_HOME} ];
 then
     wget https://dl.google.com/android/repository/android-ndk-r12b-linux-x86_64.zip
@@ -87,37 +90,37 @@ then
     git submodule update --init --recursive
 
     cp ../prebuild.sh scripts
+    cp ../build.gradle atak
     cd scripts
     ./prebuild.sh
 
     cd ../atak
+
+    ### Changes the output APK name
+    # sed -i "s/ATAK-/${newTAK}-/" ATAK/app/build.gradle
 else
     cd ${newTAK}
 
     # If the user wants a clean then whack everything
     if [ ${CLEAN} == 1 ];
     then
-        rm -rf assimp gdal takengine/thirdparty libLAS LASzip takthirdparty/builds
+        cd atak; ./gradlew clean; cd ../
+        rm -rf assimp gdal takengine/thirdparty libLAS LASzip
     fi
 
-    if [ ${SKIP} == 0 ];
+    # If the user just wants to run prebuild then exit
+    if [ ${PREBUILD} == 1 ]; 
     then
         cp ../prebuild.sh scripts
         cd scripts
         ./prebuild.sh
 
-        # If the user just wants to run prebuild then exit
-        if [ ${PREBUILD} == 1 ]; 
-        then
-            printf "Finished building ATAK requirements\n"
-            exit
-        fi
-  	
-   	cd ../
-    else
-	printf "Skipping prebuild script, per user request\n"
+        printf "Finished building ATAK requirements\n"
+        exit
     fi
+
     cd atak
+    
 fi
 
 KEYFILE="`pwd`/${newTAK}.keystore"
@@ -165,4 +168,12 @@ popd
 
 cd ../atak
 
-./gradlew assembleCivRelease
+./gradlew assembleCivRelease 
+
+mkdir ../release
+
+ATAKAPK=`ls ATAK/app/build/outputs/apk/civ/release/ATAK*.apk`
+BASEAPKNAME=`basename ${ATAKAPK}`
+NEWAPKNAME=`echo ${BASEAPKNAME} | sed "s/ATAK/${newTAK}/"`
+mv ATAK/app/build/outputs/apk/civ/release/ATAK*.apk ../${NEWAPKNAME}
+
