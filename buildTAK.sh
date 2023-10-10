@@ -55,7 +55,13 @@ then
     libssl-dev sqlite3 zlib1g-dev ant openjdk-8-jdk automake autoconf libtool swig cmake apg g++ \
     make tcl patch libogdi-dev
 
-    sudo pip3 install conan==1.60.2
+    pip3 install conan==1.60.2
+fi
+
+if [ ! -d ${ANDROID_NDK_HOME} ];
+then
+    wget https://dl.google.com/android/repository/android-ndk-r12b-linux-x86_64.zip
+    unzip -q android-ndk-r12b-linux-x86_64.zip
 fi
 
 if [ ! -d ${ANDROID_SDK_ROOT} ];
@@ -64,7 +70,6 @@ then
     unzip -q commandlinetools-linux-8512546_latest.zip
     echo "y" | ./cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses
     echo "y" | ./cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --install "platforms;android-29"
-    echo "y" | ./cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --install "ndk;23.1.7779620"
 fi
 
 if [ ! -d cmake-3.14.7-Linux-x86_64 ]; 
@@ -144,6 +149,19 @@ export takRepoConanUrl=
 export takRepoUsername=
 export takRepoPassword=
 
+cat > build.gradle << EOL
+buildscript {
+    repositories {
+        jcenter()
+        google()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:4.2.2"
+    }
+}
+EOL
+
 # Do NOT Stop on Error
 set +e
 
@@ -161,10 +179,4 @@ cd ../atak
 
 ./gradlew assembleCivRelease 
 
-mkdir ../release
-
-ATAKAPK=`ls ATAK/app/build/outputs/apk/civ/release/ATAK*.apk`
-BASEAPKNAME=`basename ${ATAKAPK}`
-NEWAPKNAME=`echo ${BASEAPKNAME} | sed "s/ATAK/${newTAK}/"`
-mv ATAK/app/build/outputs/apk/civ/release/ATAK*.apk ../${NEWAPKNAME}
 
