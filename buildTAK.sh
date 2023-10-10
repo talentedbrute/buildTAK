@@ -58,18 +58,13 @@ then
     sudo pip3 install conan
 fi
 
-if [ ! -d ${ANDROID_NDK_HOME} ];
-then
-    wget https://dl.google.com/android/repository/android-ndk-r12b-linux-x86_64.zip
-    unzip -q android-ndk-r12b-linux-x86_64.zip
-fi
-
 if [ ! -d ${ANDROID_SDK_ROOT} ];
 then
     wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
     unzip -q commandlinetools-linux-8512546_latest.zip
     echo "y" | ./cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses
     echo "y" | ./cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --install "platforms;android-29"
+    echo "y" | ./cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --install "ndk;23.1.7779620"
 fi
 
 if [ ! -d cmake-3.14.7-Linux-x86_64 ]; 
@@ -90,14 +85,11 @@ then
     git submodule update --init --recursive
 
     cp ../prebuild.sh scripts
-    cp ../build.gradle atak
     cd scripts
     ./prebuild.sh
 
     cd ../atak
 
-    ### Changes the output APK name
-    # sed -i "s/ATAK-/${newTAK}-/" ATAK/app/build.gradle
 else
     cd ${newTAK}
 
@@ -111,7 +103,6 @@ else
     # If the user just wants to run prebuild then exit
     if [ ${PREBUILD} == 1 ]; 
     then
-        cp ../prebuild.sh scripts
         cd scripts
         ./prebuild.sh
 
