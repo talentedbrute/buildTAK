@@ -55,7 +55,7 @@ then
     libssl-dev sqlite3 zlib1g-dev ant openjdk-8-jdk automake autoconf libtool swig cmake apg g++ \
     make tcl patch libogdi-dev
 
-    sudo pip3 install conan
+    sudo pip3 install conan==1.60.2
 fi
 
 if [ ! -d ${ANDROID_SDK_ROOT} ];
